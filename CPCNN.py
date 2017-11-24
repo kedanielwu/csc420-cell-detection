@@ -23,7 +23,7 @@ model.add(Conv2D(36, (4, 4), padding='same',
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Conv2D(36, (3, 3))
+model.add(Conv2D(36, (3, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
