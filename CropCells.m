@@ -6,7 +6,7 @@ for i=1:100
     detection = load(sprintf('../data/Detection/img%i/img%i_detection.mat', i, i));
     detection = detection.detection;
     %random center for negative example, 10
-    ngCp = randi([14, 487], 10, 2);
+    ngCp = randi([14, 487], 50, 2);
     for j = 1:size(detection, 1)
         c = detection(j, :);
         x = round(c(1));
@@ -31,7 +31,7 @@ for i=1:100
         %detection
         for l = 1:size(ngCp,1)
             d = pdist([ngCp(l, :);c], 'euclidean');
-            if d < 22
+            if d < 15
                 ngCp(l, :) = [0 0];
             end
         end
@@ -53,7 +53,7 @@ for i=1:100
         img = imread(sprintf('../data/Detection/img%i/img%i_%i.bmp', i, i, k));
         detection = load(sprintf('../data/Detection/img%i/img%i_%i_detection.mat', i, i, k));
         detection = detection.detection;
-        ngCp = randi([14, 487], 10, 2);
+        ngCp = randi([14, 487], 50, 2);
         for j = 1:size(detection, 1)
             c = detection(j, :);
             x = round(c(1));
@@ -78,7 +78,7 @@ for i=1:100
              %detection
             for l = 1:size(ngCp,1)
                 d = pdist([ngCp(l, :);c], 'euclidean');
-                if d < 22
+                if d < 15
                     ngCp(l, :) = [0 0];
                 end
             end

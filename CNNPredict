@@ -1,0 +1,49 @@
+from keras.models import load_model
+import os
+import imageio
+import numpy as np
+import scipy.io as sp
+import keras
+from skimage.util.shape import view_as_blocks
+from PIL import Image
+
+
+def load_test_data(number):
+
+    im = imageio.imread('../data/Detection/img{}/img{}.bmp'.format(str(number), str(number)))
+
+    block_size = 27
+
+    data = np.concatenate([im[i:i + block_size, j:j + block_size, :][np.newaxis]
+                         for i in range(0, im.shape[0] - block_size+1, 1) for j in range(0, im.shape[1] - block_size+1, 1)])
+    return data
+
+
+def remove_overlap(a, x, y):
+    x_min = max(0, x-8)
+    x_max = min(a.shape[0], x+8)
+    y_min = max(0, y-8)
+    y_max = min(a.shape[1], y+8)
+    for i in range(x_min, x_max):
+        for j in range(y_min, y_max):
+            a[i][j][1] = 0
+
+
+model = load_model('./saved_models/cell_cnn_model')
+
+for k in range(90,101):
+    test_data = load_test_data(k)
+    res = model.predict_proba(test_data, batch_size=32)
+    localMax = np.zeros((500, 500), dtype=np.int)
+    res = res.reshape(474, 474, 2)
+    r = np.array([])
+    counter = 0
+    for i in range(res.shape[0]):
+        for j in range(res.shape[1]):
+            if res[i][j][1] > res[i][j][0]:
+                counter += 1
+                nw = np.array([j + 13, i + 13])
+                r = np.concatenate((r, nw))
+                remove_overlap(res, i, j)
+    r = r.reshape(counter, 2)
+    sp.savemat('./img{}_cnn.mat'.format(str(k)), mdict={'arr': r})
