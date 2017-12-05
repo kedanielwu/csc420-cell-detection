@@ -10,7 +10,51 @@ import os
 import scipy.io as sio
 from LoadClassify import load_class_data
 
-batch_size = 50
+class Metrics(keras.callbacks.Callback):
+    def __init__(self):
+        self.precision_recall1 = np.array([])
+        self.precision_recall2 = np.array([])
+    def on_epoch_end(self, batch, logs={}):
+        correct1 = 0
+        correct2 = 0
+        gt1 = 1
+        gt2 = 1
+        pd1 = 1
+        pd2 = 1
+        predict = np.asarray(self.model.predict(self.validation_data[0]))
+        targ = self.validation_data[1]
+        for i in range(predict.shape[0]):
+            if targ[i][1] == 1:
+                gt1 += 1
+            if targ[i][2] == 1:
+                gt2 += 1
+            if predict[i][1] > predict[i][2]:
+                pd1 += 1
+            if predict[i][1] < predict[i][2]:
+                pd2 += 1
+            if predict[i][1] > predict[i][2] and targ[i][1] == 1:
+                correct1 += 1
+            if predict[i][1] < predict[i][2] and targ[i][2] == 1:
+                correct2 += 1
+        precision1 = correct1 / pd1
+        recall1 = correct1 / gt1
+        precision2 = correct2 / pd2
+        recall2 = correct2 / gt2
+        res1 = np.array([precision1, recall1])
+        res2 = np.array([precision2, recall2])
+        self.precision_recall1 = np.concatenate((self.precision_recall1, res1))
+        self.precision_recall2 = np.concatenate((self.precision_recall2, res2))
+        print("percision: ", precision1, "\n")
+        print("recall: ", recall1, "\n")
+        print("percision: ", precision2, "\n")
+        print("recall: ", recall2, "\n")
+        return
+
+    def on_train_end(self, logs=None):
+        sio.savemat('./precision_recall.mat', mdict={'pr1': self.precision_recall1, 'pr2': self.precision_recall2})
+
+pr=Metrics()
+batch_size = 300
 epochs = 50
 data_augmentation = False
 save_dir = os.path.join(os.getcwd(), 'saved_models')
@@ -71,7 +115,7 @@ data /= 255
 print(data)
 
 datagen.fit(data)
-model.fit_generator(datagen.flow(data, label,batch_size=50), epochs=epochs, validation_data=(data_t, label_t), workers=1, steps_per_epoch=500,shuffle=True)
+model.fit_generator(datagen.flow(data, label, batch_size=50), callbacks=[pr], epochs=epochs, validation_data=(data_t, label_t), workers=1, steps_per_epoch=500,shuffle=True)
 
 # Save model and weights
 if not os.path.isdir(save_dir):

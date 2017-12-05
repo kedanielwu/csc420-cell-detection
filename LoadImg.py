@@ -11,8 +11,8 @@ def load_cell_data():
 
     # training 1
     print('reading positive examples\n')
-    positive_arr1 = [imageio.imread('../cell/' + positive_example[i]) for i in range(1,50001)]
-    positive_label1 = np.ones((50000, 1), dtype=np.int)
+    positive_arr1 = [imageio.imread('../cell/' + positive_example[i]) for i in range(1,5001)]
+    positive_label1 = np.ones((5000, 1), dtype=np.int)
     print('reading negative examples\n')
     negative_arr1 = [imageio.imread('../negative/' + negative_example[i]) for i in range(1, 5001)]
     negative_label1 = np.zeros((5000, 1), dtype=np.int)
@@ -22,8 +22,8 @@ def load_cell_data():
     positive_arr_t = [imageio.imread('../cell/' + positive_example[i]) for i in range(50001, 55001)]
     positive_label_t = np.ones((5000, 1), dtype=np.int)
     print('reading negative examples\n')
-    negative_arr_t = [imageio.imread('../negative/' + negative_example[i]) for i in range(10001, 12001)]
-    negative_label_t = np.zeros((2000, 1), dtype=np.int)
+    negative_arr_t = [imageio.imread('../negative/' + negative_example[i]) for i in range(10001, 15001)]
+    negative_label_t = np.zeros((5000, 1), dtype=np.int)
 
     result = positive_arr1 + negative_arr1
     labels = np.concatenate((positive_label1, negative_label1))

@@ -1,5 +1,7 @@
 from __future__ import print_function
 import keras
+from sklearn.metrics import precision_recall_curve
+from keras import backend as K
 from keras.datasets import cifar10
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
@@ -10,6 +12,35 @@ import os
 import scipy.io as sio
 from LoadImg import load_cell_data
 
+class Metrics(keras.callbacks.Callback):
+    def __init__(self):
+        self.precision_recall = np.array([])
+    def on_epoch_end(self, batch, logs={}):
+        correct = 0
+        gt = 0
+        pd = 0
+        predict = np.asarray(self.model.predict(self.validation_data[0]))
+        targ = self.validation_data[1]
+        for i in range(predict.shape[0]):
+            if targ[i][1] == 1:
+                gt += 1
+            if predict[i][1] > predict[i][0]:
+                pd += 1
+            if predict[i][1] > predict[i][0] and targ[i][1] == 1:
+                correct += 1
+        print('\n', gt, '\n', pd, '\n', correct, '\n')
+        precision = correct / pd
+        recall = correct / gt
+        res = np.array([precision, recall])
+        self.precision_recall=np.concatenate((self.precision_recall, res))
+        print("percision: ", precision, "\n")
+        print("recall: ", recall, "\n")
+        return
+
+    def on_train_end(self, logs=None):
+        sio.savemat('./precision_recall.mat', mdict={'pr': self.precision_recall})
+
+pr = Metrics()
 batch_size = 50
 num_classes = 2
 epochs = 50
@@ -29,7 +60,7 @@ model.add(Conv2D(36, (4, 4), padding='same',
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Conv2D(36, (3, 3)))
+model.add(Conv2D(48, (3, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -59,7 +90,8 @@ model.fit(data,
           label,
           batch_size=batch_size, epochs=epochs,
           validation_data=(data_t, label_t),
-          shuffle=True)
+          shuffle=True,
+          callbacks=[pr])
 
 # Save model and weights
 if not os.path.isdir(save_dir):

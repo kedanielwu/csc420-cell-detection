@@ -1,6 +1,7 @@
 import os
 import imageio
 import numpy as np
+import cv2
 
 
 def load_class_data():
@@ -31,6 +32,7 @@ def load_class_data():
     others_label = np.full((1500, 1), 3, dtype=np.int)
 
     result = fibroblast + epithelial + inflammatory + others
+
     labels = np.concatenate((fibroblast_label, epithelial_label, inflammatory_label, others_label))
     meta = np.array([(result[j],labels[j]) for j in range(len(result))])
     print('waiting shuffle\n')

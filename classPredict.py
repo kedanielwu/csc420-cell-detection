@@ -41,15 +41,9 @@ def load_test_data(number):
 
 model = load_model('./saved_models/class_cnn_model')
 
-# for k in range(1,2):
-#     test_data = load_test_data(k)
-#     print(test_data.shape)
-#     res = model.predict_proba(test_data[1:], batch_size=32)
-#     print(res)
-#     sp.savemat('./img{}_cnn.mat'.format(str(k)), mdict={'arr': res})
-
-for k in range(1,100):
-    im = imageio.imread('../others/{}.bmp'.format(str(k)))
-    im = im[np.newaxis]
-    res = model.predict(im)
+for k in range(1,2):
+    test_data = load_test_data(k)
+    print(test_data.shape)
+    res = model.predict_proba(test_data[1:], batch_size=32)
     print(res)
+    sp.savemat('./img{}_class.mat'.format(str(k)), mdict={'arr': res})
